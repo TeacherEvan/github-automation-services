@@ -1,0 +1,124 @@
+name: AI Issue Triage Bot
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: AI Issue Analysis
+        id: analyze
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.issue.number;
+            const issue = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+
+            const issueTitle = issue.data.title;
+            const issueBody = issue.data.body || '';
+            const issueContent = `Title: ${issueTitle}\n\nBody: ${issueBody}`;
+
+            // Call OpenAI API for classification
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                  {
+                    role: 'system',
+                    content: `You are a GitHub issue triage assistant. Analyze issues and classify them with appropriate labels and priority.
+                    
+Available labels:
+- Type: bug, feature, documentation, question, enhancement
+- Priority: P0-critical, P1-high, P2-medium, P3-low
+- Area: frontend, backend, api, infrastructure, security, performance
+- Status: needs-triage, needs-info, ready-for-dev, duplicate
+
+Respond ONLY with valid JSON in this format:
+{
+  "labels": ["label1", "label2"],
+  "priority": "P1-high",
+  "assignSuggestion": "team-backend",
+  "comment": "Brief analysis and suggested next steps",
+  "isDuplicate": false
+}`
+                  },
+                  {
+                    role: 'user',
+                    content: issueContent
+                  }
+                ],
+                temperature: 0.3,
+                max_tokens: 500
+              })
+            });
+
+            const data = await response.json();
+            const analysis = JSON.parse(data.choices[0].message.content);
+
+            // Apply labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: [...analysis.labels, analysis.priority]
+            });
+
+            // Add comment with analysis
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `🤖 **AI Triage Analysis**\n\n${analysis.comment}\n\n` +
+                    `**Suggested Labels:** ${analysis.labels.join(', ')}\n` +
+                    `**Priority:** ${analysis.priority}\n` +
+                    `**Suggested Team:** ${analysis.assignSuggestion || 'General'}\n\n` +
+                    `---\n_Automated by AI Issue Triage Bot_`
+            });
+
+            // If duplicate detected, mark and close
+            if (analysis.isDuplicate) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                state: 'closed',
+                state_reason: 'not_planned'
+              });
+            }
+
+            core.setOutput('labels', analysis.labels.join(','));
+            core.setOutput('priority', analysis.priority);
+
+      - name: Report Success
+        if: success()
+        run: |
+          echo "✅ Issue #${{ github.event.issue.number }} successfully triaged"
+          echo "Labels: ${{ steps.analyze.outputs.labels }}"
+          echo "Priority: ${{ steps.analyze.outputs.priority }}"
