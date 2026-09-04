@@ -20,31 +20,10 @@ Automated GitHub workflows using AI to handle the tedious work your team wastes 
 
 ---
 
-## 💰 Pricing
+## 💼 Service Packages
 
-### DIY Package - $99
-- Workflow file + complete documentation
-- Setup instructions
-- Basic email support
-- Lifetime updates
-
-### Managed Setup - $500-$1,500
-*Most Popular*
-- Full repository configuration
-- Custom label setup & migration
-- Testing & validation
-- Team training (1 hour)
-- 30-day support
-- Optional maintenance: $100/month
-
-### Full Service - $1,500+
-*Enterprise Grade*
-- Everything in Managed
-- Custom workflow development
-- Integration with existing tools
-- Dedicated support channel
-- Monthly optimization calls
-- Retainer: $200-$500/month
+Pricing and packaged offerings (DIY, Managed Setup, Full Service) live on the project landing
+page: see [`index.html`](./index.html) (rendered by GitHub Pages).
 
 ---
 
@@ -115,24 +94,15 @@ curl -s https://raw.githubusercontent.com/TeacherEvan/github-automation-services
 
 ---
 
-## 📞 Get Started
+## 🚀 Getting Started
 
-### Option 1: Free Automation Audit
-30-minute call where we analyze your repository and identify specific opportunities to save time.
+1. Copy `.github/workflows/issue-triage-bot.yml` into your repository.
+2. Add the `OPENAI_API_KEY` secret (Settings → Secrets and variables → Actions).
+3. Run `scripts/setup-labels.sh` to create the required labels.
+4. Open a test issue and watch the Actions tab.
 
-**No obligation. No sales pitch. Just value.**
-
-👉 [Schedule Free Audit](mailto:ewiebotha@gmail.com?subject=Free%20Automation%20Audit)
-
-### Option 2: DIY Setup
-Grab the workflow files and set it up yourself. Full documentation included.
-
-👉 [Browse Workflows →](workflows/)
-
-### Option 3: Let Us Handle It
-We configure everything, train your team, and provide ongoing support.
-
-👉 [Get Quote](mailto:ewiebotha@gmail.com?subject=Managed%20Setup%20Quote)
+Full setup guide: [docs/issue-triage-bot-setup.md](docs/issue-triage-bot-setup.md).
+Pricing, audit, and managed-setup requests: see [`index.html`](./index.html).
 
 ---
 
@@ -170,8 +140,9 @@ We configure everything, train your team, and provide ongoing support.
 ## 🤝 Support
 
 **Email:** ewiebotha@gmail.com  
-**WhatsApp:** +27 616 642 713  
 **GitHub Issues:** [Report a bug](https://github.com/TeacherEvan/github-automation-services/issues)
+
+> Personal phone / WhatsApp is intentionally not listed in this repository.
 
 ---
 
