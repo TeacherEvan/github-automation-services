@@ -25,9 +25,13 @@ Automatically analyze, label, and prioritize GitHub issues using AI. Saves 5-10 
 - GitHub Actions enabled
 
 ### Step 1: Add Workflow File
-1. Create `.github/workflows/` directory in your repo if it doesn't exist
-2. Copy `issue-triage-bot.yml` into `.github/workflows/`
-3. Commit and push to your default branch
+The canonical, hardened deployment copy lives at `.github/workflows/issue-triage-bot.yml` in this
+repo. The `workflows/issue-triage-bot.yml` file in this repo is the upstream template.
+
+1. In your own repo, create `.github/workflows/` if it doesn't exist
+2. Copy `.github/workflows/issue-triage-bot.yml` from this repo into your `.github/workflows/`
+3. (Optional) Customize the system prompt, model, or allowlist for your team — see Customization
+4. Commit and push to your default branch
 
 ### Step 2: Configure Secrets
 1. Go to repo Settings → Secrets and variables → Actions
