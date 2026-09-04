@@ -1,0 +1,12 @@
+# Surgical-implementation audit scratch (never commit)
+docs/.scratch-audit/
+
+# Common ignores
+node_modules/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+.idea/
+.vscode/
