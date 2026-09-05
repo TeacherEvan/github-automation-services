@@ -1,0 +1,151 @@
+name: AI Issue Triage Bot
+on:
+  issues:
+    types: [opened]
+
+# Least-privilege: only the permissions this job actually exercises.
+permissions:
+  issues: write
+
+# Cancel stale runs on the same issue - comment storms will not spawn parallel triages.
+concurrency:
+  group: issue-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.1.0
+
+      - name: AI Issue Analysis
+        id: analyze
+        uses: actions/github-script@60b8d5b8b25b65e44d83de7f9c9a6c1a4c5d0d5d # v7.0.1
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Allowlist of label slugs the workflow is permitted to apply.
+            // Anything the model returns outside this list is silently dropped -
+            // prevents label-injection / label-spam from a compromised or hallucinating model.
+            const ALLOWED_LABELS = new Set([
+              'bug', 'feature', 'documentation', 'question', 'enhancement',
+              'frontend', 'backend', 'api', 'infrastructure', 'security', 'performance',
+              'needs-triage', 'needs-info', 'ready-for-dev', 'duplicate'
+            ]);
+            const ALLOWED_PRIORITIES = new Set(['P0-critical', 'P1-high', 'P2-medium', 'P3-low']);
+            const SYSTEM_PROMPT = [
+              'You are a GitHub issue triage assistant. Analyze issues and classify them with appropriate labels and priority.',
+              '',
+              'Available labels:',
+              '- Type: bug, feature, documentation, question, enhancement',
+              '- Priority: P0-critical, P1-high, P2-medium, P3-low',
+              '- Area: frontend, backend, api, infrastructure, security, performance',
+              '- Status: needs-triage, needs-info, ready-for-dev, duplicate',
+              '',
+              'Respond ONLY with valid JSON in this exact format:',
+              '{ "labels": ["label1","label2"], "priority": "P1-high", "assignSuggestion": "team-backend", "comment": "Brief analysis and next steps", "isDuplicate": false }'
+            ].join('\n');
+
+            try {
+              const issueNumber = context.issue.number;
+              const issue = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              const issueContent = `Title: ${issue.data.title}\n\nBody: ${issue.data.body || ''}`;
+
+              const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                  model: 'gpt-4o-mini',
+                  messages: [
+                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'user', content: issueContent }
+                  ],
+                  temperature: 0.3,
+                  max_tokens: 500
+                })
+              });
+
+              if (!response.ok) {
+                core.setFailed(`OpenAI API returned HTTP ${response.status}`);
+                return;
+              }
+              const data = await response.json();
+              if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                core.setFailed('OpenAI response missing choices[0].message');
+                return;
+              }
+
+              let analysis;
+              try { analysis = JSON.parse(data.choices[0].message.content); }
+              catch (e) { core.setFailed(`Model output was not valid JSON: ${e.message}`); return; }
+
+              const safeLabels = Array.isArray(analysis.labels)
+                ? analysis.labels.filter(l => typeof l === 'string' && ALLOWED_LABELS.has(l))
+                : [];
+              const safePriority = ALLOWED_PRIORITIES.has(analysis.priority) ? analysis.priority : null;
+              if (!safePriority) {
+                core.setFailed(`Model returned disallowed priority: ${analysis.priority}`);
+                return;
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: [...safeLabels, safePriority]
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: [
+                  'AI Triage Analysis',
+                  '',
+                  String(analysis.comment || ''),
+                  '',
+                  `**Suggested Labels:** ${safeLabels.join(', ') || '(none)'}`,
+                  `**Priority:** ${safePriority}`,
+                  `**Suggested Team:** ${analysis.assignSuggestion || 'General'}`,
+                  '',
+                  '---',
+                  '_Automated by AI Issue Triage Bot_'
+                ].join('\n')
+              });
+
+              if (analysis.isDuplicate === true) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  state: 'closed',
+                  state_reason: 'not_planned'
+                });
+              }
+
+              core.setOutput('labels', safeLabels.join(','));
+              core.setOutput('priority', safePriority);
+            } catch (err) {
+              core.setFailed(`Triage failed: ${err && err.message ? err.message : String(err)}`);
+            }
+
+      - name: Report Success
+        if: success()
+        run: |
+          echo "Issue #${{ github.event.issue.number }} successfully triaged"
+          echo "Labels: ${{ steps.analyze.outputs.labels }}"
+          echo "Priority: ${{ steps.analyze.outputs.priority }}"
