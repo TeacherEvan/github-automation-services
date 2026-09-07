@@ -50,7 +50,7 @@ page: see [`index.html`](./index.html) (rendered by GitHub Pages).
 1. **Copy the workflow:**
 ```bash
 mkdir -p .github/workflows
-curl -o .github/workflows/issue-triage.yml \
+curl -o .github/workflows/issue-triage-bot.yml \
   https://raw.githubusercontent.com/TeacherEvan/github-automation-services/master/workflows/issue-triage-bot.yml
 ```
 
