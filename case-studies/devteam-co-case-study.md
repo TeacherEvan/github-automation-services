@@ -200,7 +200,7 @@ Beyond the numbers, the team reports:
 **Get Your Free Automation Audit**  
 We'll analyze your repository and identify exactly where you can save the most time.
 
-📧 Email: automation@yourcompany.com  
+📧 Email: ewiebotha@gmail.com  
 💬 WhatsApp: +27 616 642 713  
 ⏱️ 30-minute call, zero obligation
 

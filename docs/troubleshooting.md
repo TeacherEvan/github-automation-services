@@ -72,7 +72,7 @@ during copy/paste.
 
 **Fix:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/TeacherEvan/github-automation-services/master/workflows/issue-triage-bot.yml \
+curl -fsSL https://raw.githubusercontent.com/TeacherEvan/github-automation-services/master/.github/workflows/issue-triage-bot.yml \
   -o .github/workflows/issue-triage-bot.yml
 ```
 Re-fetch from `master` (not your fork) to ensure you get the pinned, hardened
