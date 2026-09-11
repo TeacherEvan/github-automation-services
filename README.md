@@ -88,8 +88,8 @@ curl -s https://raw.githubusercontent.com/TeacherEvan/github-automation-services
 - Annual cost: **$55,200**
 
 **Our solution:**
-- One-time setup: $500-$1,500
-- Monthly cost: $5 (API fees)
+- One-time setup: $500-$1,600
+- Monthly cost: under $2 (API fees; see [cost calculator](docs/cost-calculator.md))
 - **Payback period:** 1-3 weeks
 
 ---
@@ -116,8 +116,8 @@ Pricing, audit, and managed-setup requests: see [`index.html`](./index.html).
 
 **Costs:**
 - GitHub Actions: Free (2,000 minutes/month)
-- OpenAI API: ~$0.0003 per issue (~$3/month for 100 issues)
-- **Total:** < $5/month for most teams
+- OpenAI API: ~$0.0002 per issue (~$0.02/month for 100 issues; see [cost calculator](docs/cost-calculator.md))
+- **Total:** < $2/month API + free Actions minutes for most teams
 
 **Security:**
 - Runs in your repository (your control)
