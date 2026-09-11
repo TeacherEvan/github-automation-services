@@ -117,7 +117,7 @@ first — see the canonical workflow for the exact pattern.
 
 ## 6. Trigger on additional events
 
-Default trigger: `issues: [opened, edited]`. To also triage when an
+Default trigger: `issues: [opened]`. To also triage when an
 issue is **reopened** or **labeled** (e.g. a human labels something as
 `needs-triage`):
 

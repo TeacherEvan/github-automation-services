@@ -42,7 +42,6 @@ happens when the canonical YAML's `permissions:` block is removed or overridden.
 ```yaml
 permissions:
   issues: write
-  contents: read
 ```
 Do not set a top-level `permissions: read-all` — that strips write access.
 
@@ -106,8 +105,12 @@ repository's Actions secrets. Then check whether the `fetch` call to
 
 **Symptom:** The same labels are added repeatedly when an issue is edited.
 
-**Fix:** The canonical workflow already deduplicates via
-`addLabels({ labels: [...new Set([...existing, ...proposed])] })`. If you have
-forked and removed that block, restore it. The fix is in the system prompt
+**Fix:** The canonical workflow applies labels via
+`github.rest.issues.addLabels({ labels: [...safeLabels, safePriority] })`.
+Labels are filtered through the `ALLOWED_LABELS` closed set before being applied,
+so a compromised or hallucinating model cannot inject arbitrary slugs. The
+concurrency block (`cancel-in-progress: true`) also prevents parallel runs
+from racing on the same issue. If you have forked and removed the allowlist
+filter, restore it. The fix is in the system prompt
 "Respond ONLY with valid JSON" — parse failures silently fall back to no-op,
 which prevents partial adds.
