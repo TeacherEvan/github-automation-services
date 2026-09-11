@@ -180,7 +180,7 @@ As the team grows from 12 → 25 developers, automation value increases:
 
 ## Conclusion
 
-For a one-time investment of $1,600 and $155/month maintenance, DevTeam Co. now saves:
+For a one-time investment of $1,600 and $150/month maintenance, DevTeam Co. now saves:
 - **11 hours/week** of developer time
 - **$4,400/month** in labor costs
 - **$51,000/year** ongoing
