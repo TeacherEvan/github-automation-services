@@ -88,9 +88,9 @@ We implemented three automations:
 ### Investment
 - **Setup Costs:** $1,600 (one-time)
 - **Maintenance:** $150/month (optional optimization retainer)
-- **API Costs:** $5/month (OpenAI for AI analysis)
-- **Total First Month:** $1,755
-- **Monthly Recurring:** $155
+- **API Costs:** ~$0.01/month (OpenAI for AI analysis; see [cost calculator](../docs/cost-calculator.md))
+- **Total First Month:** $1,750.01
+- **Monthly Recurring:** $150.01
 
 ### Time Savings
 - **Hours Saved:** 11 hours/week
@@ -98,8 +98,8 @@ We implemented three automations:
 - **Value at $100/hr:** $4,400/month
 
 ### Net Benefit
-- **First Month:** $4,400 - $1,755 = **$2,645 profit**
-- **Months 2+:** $4,400 - $155 = **$4,245/month profit**
+- **First Month:** $4,400 - $1,750.01 = **$2,649.99 profit**
+- **Months 2+:** $4,400 - $150.01 = **$4,249.99/month profit**
 - **Annual Savings:** **~$51,000**
 
 **Payback Period:** 9 days
