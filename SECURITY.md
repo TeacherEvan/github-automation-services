@@ -47,3 +47,24 @@ Please open a private security advisory on GitHub:
 Or email the maintainer: see the GitHub profile for the address on file.
 
 Please DO NOT file a public issue for suspected vulnerabilities.
+
+
+## Verification Gate
+
+The hardening properties above are enforced by a reproducible gate:
+
+    scripts/verify-triage-bot.sh
+
+The gate statically parses the workflow YAML and asserts, on every run:
+
+- **REQ-001** — every `uses:` action resolves to a 40-character commit SHA
+  (no mutable `@vN` tags).
+- **REQ-002** — `permissions:` grants only `issues: write`.
+- **REQ-003** — the inline `ALLOWED_LABELS` and `ALLOWED_PRIORITIES` closed
+  sets exist and are non-empty.
+- **REQ-004** — the label set declared in the workflow matches the labels
+  created by `scripts/setup-labels.sh`.
+
+Exit code 0 means all checks pass; non-zero means a specific failure was
+reported. The gate is idempotent, requires no network access, and needs no
+secrets — safe to run in CI.
