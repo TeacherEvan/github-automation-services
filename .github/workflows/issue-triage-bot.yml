@@ -25,7 +25,7 @@ jobs:
 
       - name: AI Issue Analysis
         id: analyze
-        uses: actions/github-script@60b8d5b8b25b65e44d83de7f9c9a6c1a4c5d0d5d # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
